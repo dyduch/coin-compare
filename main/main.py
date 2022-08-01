@@ -32,9 +32,9 @@ def get_ma_order(data: pd.DataFrame, column: str) -> int:
 
 def main():
     filenames = ['BTC-USD']
-    train_start_dates = ['2022-03-26']
-    train_end_dates = ['2022-06-09']
-    test_end_dates = ['2022-06-15']
+    train_start_dates = ['2022-05-15']
+    train_end_dates = ['2022-07-11']
+    test_end_dates = ['2022-07-13']
 
     for file in filenames:
         for train_start in train_start_dates:
@@ -93,13 +93,20 @@ def run_arima_for_dates(plot_name, train_start, train_end, test_start, test_end)
     plot_result(best_prediction, best_model, plot_name + ' automated', test_start, whole)
     print(best_rmse)
 
+    future_prediction = best_model.predict(start=test_end, end='2022-08-31')
+    plot_result(best_prediction, best_model, plot_name + ' automated', test_start, whole, future_prediction=future_prediction)
 
-def plot_result(best_prediction, model, plot_name, test_start, whole):
+
+def plot_result(best_prediction, model, plot_name, test_start, whole, future_prediction=None):
     whole.shift().plot(label='Real data')
     model.fittedvalues[2:].plot(label='Model fitted values')
     best_prediction.plot(c='red', title=plot_name, label='Model predicted values')
+    legend = ['Real data', 'Model fitted values', 'Model prediction']
+    if future_prediction is not None:
+        future_prediction.plot(c='green', label='Future predicted values')
+        legend.append('Future predicted values')
+    plt.legend(legend)
     plt.axvline(x=test_start, color='black', linestyle='--')
-    plt.legend(['Real data', 'Model fitted values', 'Model prediction'])
     plt.show()
 
 
