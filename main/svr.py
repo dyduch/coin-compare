@@ -67,7 +67,7 @@ def main():
     dates = np.reshape(dates, (len(dates), 1))
     prices = np.reshape(prices, (len(prices), 1)).ravel()
 
-    svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
+    svr_rbf = SVR(kernel='rbf', C=1e4, gamma=0.2)
     svr_rbf.fit(dates, prices)
 
     plt.figure(figsize=(12, 6))
