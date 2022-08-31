@@ -15,12 +15,12 @@ register_matplotlib_converters()
 # https://towardsdatascience.com/walking-through-support-vector-regression-and-lstms-with-stock-price-prediction-45e11b620650
 
 def main():
-    start = datetime.datetime(2020, 1, 1)
-    end = datetime.datetime(2022, 6, 30)
+    start = datetime.datetime(2019, 1, 1)
+    end = datetime.datetime(2022, 3, 30)
     df = web.DataReader('BTC-USD', 'yahoo', start, end)
 
-    test_start = datetime.datetime(2022, 7, 1)
-    test_end = datetime.datetime.today()
+    test_start = datetime.datetime(2022, 4, 1)
+    test_end = datetime.datetime(2022, 7, 13)
     test_df = web.DataReader('BTC-USD', 'yahoo', test_start, test_end)
 
     df = df.sort_values('Date')
@@ -76,7 +76,7 @@ def main():
     test_dates = np.reshape(test_dates, (len(test_dates), 1))
     test_prices = np.reshape(test_prices, (len(test_prices), 1)).ravel()
 
-    svr_rbf = SVR(kernel='rbf', C=1e4, gamma=0.0003)
+    svr_rbf = SVR(kernel='rbf', C=10000, gamma=0.0002)
     svr_rbf.fit(dates, prices)
 
     plt.figure(figsize=(12, 6))
@@ -84,10 +84,12 @@ def main():
     plt.plot(org_dates, svr_rbf.predict(dates), color='red', label='RBF model')
     plt.plot(test_dates, test_prices, color='brown', label='Data Test')
     plt.plot(test_org_dates, svr_rbf.predict(test_dates), color='green', label='RBF predict')
+
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.legend()
     plt.show()
+    print(svr_rbf.score(test_dates, test_prices))
 
 
 
