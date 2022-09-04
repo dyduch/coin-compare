@@ -66,7 +66,6 @@ def lstm():
     dates = dates_total_df['Date'].values
     prices = total_df['High'].values
 
-
     # test_dates = dates_test_df['Date'].values
     # test_prices = dates_test_df['High'].values
     #
@@ -74,46 +73,35 @@ def lstm():
     #
     training_data_len = math.ceil(len(prices) * 0.8)
     scaled_prices = scaler.fit_transform(prices.reshape(-1, 1))
-    dates_reshaped = dates.reshape(-1, 1)
-    train_dates = dates_reshaped[0: training_data_len, :]
     train_prices = scaled_prices[0: training_data_len, :]
 
     x_train = []
     y_train = []
-    # batch_size = 30
-    # #
-    for i in range(training_data_len):
-        x_train.append(train_dates[i, 0])
+    batch_size = 1
+    #
+    for i in range(batch_size, len(train_prices)):
+        x_train.append(train_prices[i - batch_size: i, 0])
         y_train.append(train_prices[i, 0])
-    #
+
+
+
     x_train, y_train = np.array(x_train), np.array(y_train)
+    print(x_train.shape)
+    print(y_train.shape)
+    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
 
     print(x_train.shape)
     print(y_train.shape)
 
-    x_train = np.reshape(x_train, (x_train.shape[0], 1, 1))
-
-    print(x_train.shape)
-    print(y_train.shape)
-
-    # x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
-    #
-    test_dates = dates_reshaped[training_data_len:, :]
-    print(test_dates)
+    test_data = scaled_prices[training_data_len - batch_size:, :]
     x_test = []
     y_test = prices[training_data_len:]
-    #
-    for i in range(len(test_dates)):
-        x_test.append(test_dates[i, 0])
 
+    for i in range(batch_size, len(test_data)):
+        x_test.append(test_data[i - batch_size:i, 0])
 
     x_test = np.array(x_test)
-    x_test = np.reshape(x_test, (x_test.shape[0], 1, 1))
-    print(x_test.shape)
-    # print(x_train.shape)
-    # print(y_train.shape)
-    # print(x_test.shape)
-    # print(y_test.shape)
+    x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
 
     model = keras.Sequential()
     model.add(layers.LSTM(100, return_sequences=True, input_shape=(x_train.shape[1], 1)))

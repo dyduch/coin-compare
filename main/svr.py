@@ -69,27 +69,35 @@ def main():
     test_dates = dates_test_df['Date'].values
     test_prices = dates_test_df['High'].values
 
+    print(dates.shape)
+    print(prices.shape)
+
     # Convert to 1d Vector
     dates = np.reshape(dates, (len(dates), 1))
     prices = np.reshape(prices, (len(prices), 1)).ravel()
 
+    print(dates.shape)
+    print(prices.shape)
+
     test_dates = np.reshape(test_dates, (len(test_dates), 1))
     test_prices = np.reshape(test_prices, (len(test_prices), 1)).ravel()
 
-    svr_rbf = SVR(kernel='rbf', C=10000, gamma=0.0002)
-    svr_rbf.fit(dates, prices)
 
-    plt.figure(figsize=(12, 6))
-    plt.plot(dates, prices, color='black', label='Data')
-    plt.plot(org_dates, svr_rbf.predict(dates), color='red', label='RBF model')
-    plt.plot(test_dates, test_prices, color='brown', label='Data Test')
-    plt.plot(test_org_dates, svr_rbf.predict(test_dates), color='green', label='RBF predict')
 
-    plt.xlabel('Date')
-    plt.ylabel('Price')
-    plt.legend()
-    plt.show()
-    print(svr_rbf.score(test_dates, test_prices))
+    # svr_rbf = SVR(kernel='rbf', C=10000, gamma=0.0002)
+    # svr_rbf.fit(dates, prices)
+    #
+    # plt.figure(figsize=(12, 6))
+    # plt.plot(dates, prices, color='black', label='Data')
+    # plt.plot(org_dates, svr_rbf.predict(dates), color='red', label='RBF model')
+    # plt.plot(test_dates, test_prices, color='brown', label='Data Test')
+    # plt.plot(test_org_dates, svr_rbf.predict(test_dates), color='green', label='RBF predict')
+    #
+    # plt.xlabel('Date')
+    # plt.ylabel('Price')
+    # plt.legend()
+    # plt.show()
+    # print(svr_rbf.score(test_dates, test_prices))
 
 
 
