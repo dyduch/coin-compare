@@ -16,7 +16,6 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 
-# https://medium.com/the-handbook-of-coding-in-finance/stock-prices-prediction-using-long-short-term-memory-lstm-model-in-python-734dd1ed6827
 
 def lstm():
     start = datetime.datetime(2021, 1, 1)
@@ -81,7 +80,8 @@ def lstm():
     x_train = []
     y_train = []
     # batch_size = 30
-    # #
+    # ## https://towardsdatascience.com/walking-through-support-vector-regression-and-lstms-with-stock-price-prediction-45e11b620650
+
     for i in range(training_data_len):
         x_train.append(train_dates[i, 0])
         y_train.append(train_prices[i, 0])
