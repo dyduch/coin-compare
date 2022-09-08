@@ -15,12 +15,12 @@ register_matplotlib_converters()
 # https://towardsdatascience.com/walking-through-support-vector-regression-and-lstms-with-stock-price-prediction-45e11b620650
 
 def main():
-    start = datetime.datetime(2020, 1, 1)
-    end = datetime.datetime(2022, 6, 30)
+    start = datetime.datetime(2019, 1, 1)
+    end = datetime.datetime(2022, 3, 30)
     df = web.DataReader('BTC-USD', 'yahoo', start, end)
 
-    test_start = datetime.datetime(2022, 7, 1)
-    test_end = datetime.datetime.today()
+    test_start = datetime.datetime(2022, 4, 1)
+    test_end = datetime.datetime(2022, 7, 13)
     test_df = web.DataReader('BTC-USD', 'yahoo', test_start, test_end)
 
     df = df.sort_values('Date')
@@ -32,7 +32,6 @@ def main():
     test_df.reset_index(inplace=True)
     test_df.set_index("Date", inplace=True)
 
-
     plt.figure(figsize=(12, 6))
     plt.plot(df["High"])
     plt.xlabel('Date', fontsize=15)
@@ -41,7 +40,6 @@ def main():
     # Rolling mean
     close_px = df['High']
     mavg = close_px.rolling(window=100).mean()
-
     plt.figure(figsize=(12, 6))
     close_px.plot(label='BTC-USD')
     mavg.plot(label='mavg')
@@ -54,29 +52,44 @@ def main():
     dates_df = df.copy()
     dates_df = dates_df.reset_index()
 
+    dates_test_df = test_df.copy()
+    dates_test_df = dates_test_df.reset_index()
+
     # Store the original dates for plotting the predicitons
     org_dates = dates_df['Date']
+    test_org_dates = dates_test_df['Date']
 
     # convert to ints
     dates_df['Date'] = dates_df['Date'].map(mdates.date2num)
+    dates_test_df['Date'] = dates_test_df['Date'].map(mdates.date2num)
 
     dates = dates_df['Date'].values
     prices = df['High'].values
+
+    test_dates = dates_test_df['Date'].values
+    test_prices = dates_test_df['High'].values
 
     # Convert to 1d Vector
     dates = np.reshape(dates, (len(dates), 1))
     prices = np.reshape(prices, (len(prices), 1)).ravel()
 
-    svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
+    test_dates = np.reshape(test_dates, (len(test_dates), 1))
+    test_prices = np.reshape(test_prices, (len(test_prices), 1)).ravel()
+
+    svr_rbf = SVR(kernel='rbf', C=10000, gamma=0.0002)
     svr_rbf.fit(dates, prices)
 
     plt.figure(figsize=(12, 6))
     plt.plot(dates, prices, color='black', label='Data')
     plt.plot(org_dates, svr_rbf.predict(dates), color='red', label='RBF model')
+    plt.plot(test_dates, test_prices, color='brown', label='Data Test')
+    plt.plot(test_org_dates, svr_rbf.predict(test_dates), color='green', label='RBF predict')
+
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.legend()
     plt.show()
+    print(svr_rbf.score(test_dates, test_prices))
 
 
 
