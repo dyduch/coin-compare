@@ -23,10 +23,8 @@ class ArimaMethod:
         self.max_d = max_d
         self.max_q = max_q
 
-    def fit(self, data: pd.DataFrame, column: str, split: float) -> ARIMAResults:
+    def fit(self, data: pd.DataFrame, column: str, split_index: int) -> ARIMAResults:
         filtered_data = data.loc[:, [column]]
-        split_index = math.ceil(len(filtered_data.values) * split)
-
         train_df = filtered_data.iloc[:split_index, :]
         test_df = filtered_data.iloc[split_index:, :]
 
