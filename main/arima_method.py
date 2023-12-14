@@ -23,10 +23,8 @@ class ArimaMethod:
         self.max_d = max_d
         self.max_q = max_q
 
-    def fit(self, data: pd.DataFrame, column: str, split: float) -> ARIMAResults:
+    def fit(self, data: pd.DataFrame, column: str, split_index: int) -> ARIMAResults:
         filtered_data = data.loc[:, [column]]
-        split_index = math.ceil(len(filtered_data.values) * split)
-
         train_df = filtered_data.iloc[:split_index, :]
         test_df = filtered_data.iloc[split_index:, :]
 
@@ -46,9 +44,9 @@ class ArimaMethod:
         best_p, best_d, best_q = self.get_arima_parameters(train_df, column)
         best_model, best_rmse = self.compute_model_and_rmse(train_df, test_df, best_p, best_d, best_q)
 
-        for p in range(self.max_p):
-            for d in range(self.max_d):
-                for q in range(self.max_q):
+        for p in range(1, self.max_p + 1):
+            for d in range(1, self.max_d + 1):
+                for q in range(1, self.max_q + 1):
                     try:
                         new_model, new_rmse = self.compute_model_and_rmse(train_df, test_df, p, d, q)
                         print("New rmse: {0} for parameters (p={1}, d={2}, q={3}) - previous best rmse: {4}".format(
