@@ -8,10 +8,11 @@ from sklearn.svm import SVR
 class SVRMethod:
     def __init__(self, kernel: str = 'rbf',
                  c_reg: float = 1.0,
-                 gamma='scale'):
+                 gamma='scale', epsilon: float = 0.1):
         self.kernel = kernel
         self.c_reg = c_reg
         self.gamma = gamma
+        self.epsilon = epsilon
 
     def fit(self, data: pd.DataFrame, column: str, split_index: int) -> SVR:
         filtered_data = data.loc[:, [column]]
@@ -25,7 +26,7 @@ class SVRMethod:
 
         dates = np.reshape(dates, (len(dates), 1))
 
-        model = SVR(kernel=self.kernel, C=self.c_reg, gamma=self.gamma)
+        model = SVR(kernel=self.kernel, C=self.c_reg, gamma=self.gamma, epsilon=self.epsilon)
         model.fit(dates, prices)
         return model
 

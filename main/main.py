@@ -8,6 +8,7 @@ import yfinance as yf
 from matplotlib import pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 from matplotlib.dates import DayLocator, MonthLocator
+from sklearn.preprocessing import MinMaxScaler
 
 from arima_method import ArimaMethod
 from statsmodels.tsa.arima_model import ARIMAResults
@@ -19,16 +20,15 @@ yf.pdr_override()
 def main():
     column_name = 'Close'
     currency = 'BTC-USD'
-    start_end_pairs = [variable_train_length_test_single(3)]
-    svr_gammas = [1, 0.1, 0.2, 0.5, 0.01, 0.02, 0.05, 0.001, 0.002, 0.005, 0.0001, 0.0002, 0.0005]
-    svr_cs = [1, 10, 100, 1000, 10000]
+    start_end_pairs = [single_set_test()]
     top_3_rmse = []
-    svr_gammas = [0.0002]
-    svr_cs = [1000]
+    svr_gammas = [0.008, 0.010, 0.012, 'scale']
+    svr_cs = [256, 60, 45]
+    svr_eps = 0.05
     for gamma in svr_gammas:
         for c in svr_cs:
             print("SVR: c={0}, gamma={1}".format(c, gamma))
-            svr_method = SVRMethod(c_reg=c, gamma=gamma)
+            svr_method = SVRMethod(c_reg=c, gamma=gamma, epsilon=svr_eps)
             for pair in start_end_pairs:
                 rmse_table = []
                 mape_table = []
@@ -36,10 +36,15 @@ def main():
                 print("\n\n")
                 print(pair[0], pair[1])
                 svr_model = None
-                for test_sample_size in [1, 7, 21, 60]:
+                for test_sample_size in [30]:
                     start, end = pair
 
                     df = get_data(start, end, currency, test_sample_size)
+
+                    scaler = MinMaxScaler()
+                    arr_scaled = scaler.fit_transform(df)
+
+                    df = pd.DataFrame(arr_scaled, columns=df.columns, index=df.index)
 
                     dates_df = df.copy()
                     dates_df = dates_df.reset_index()
@@ -66,27 +71,37 @@ def main():
                     split_index = len(df.values) - test_sample_size - 1
                     test_dates = dates[split_index:]
 
+                    fig = plt.figure(figsize=(12, 7))
+                    ax = plt.axes()
+                    plt.plot(dates, prices, color='black', linestyle='-', label='Cena')
+                    plt.plot(test_dates, svr_results.values, color='teal', label='SVR')
+                    ax.xaxis.set_major_locator(DayLocator(interval=14))
+                    plt.xlabel('Data')
+                    plt.ylabel('Cena w USD')
+                    plt.title(
+                        'Wykres cen {0} wraz z dopasowanym modelem SVR(c={1}, gamma={2}, eps={3} i przewidzianymi wartościami'.format(currency, c, gamma, svr_eps))
+                    plt.legend()
+                    plt.grid()
+                    plt.show()
 
-
-                if len(top_3_rmse) < 3:
-                    top_3_rmse.append((rmse_table, c, gamma))
-                else:
-                    for i in range(len(top_3_rmse)):
-                        if top_3_rmse[i][0][3] > rmse_table[3]:
-                            top_3_rmse[i] = (rmse_table, c, gamma)
-                            break
-
-
-                print(" & ".join(map(str, rmse_table)))
-                print(" & ".join(map(str, mape_table)))
-                print(" & ".join(map(str, rmspe_table)))
+                # if len(top_3_rmse) < 3:
+                #     top_3_rmse.append((rmse_table, c, gamma))
+                # else:
+                #     for i in range(len(top_3_rmse)):
+                #         if top_3_rmse[i][0][3] > rmse_table[3]:
+                #             top_3_rmse[i] = (rmse_table, c, gamma)
+                #             break
+                #
+                #
+                # print(" & ".join(map(str, rmse_table)))
+                # print(" & ".join(map(str, mape_table)))
+                # print(" & ".join(map(str, rmspe_table)))
     print(top_3_rmse)
 
 
 
 def single_set_test():
-    return datetime.datetime(2020, 1, 1), datetime.datetime(2022, 7, 1)
-
+    return datetime.datetime(2023, 6, 1), datetime.datetime(2023, 11, 1)
 
 
 def variable_train_set_test():
