@@ -5,13 +5,13 @@ import pandas as pd
 import datetime
 from pandas_datareader import data as pdr
 import yfinance as yf
-from matplotlib import pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
-from matplotlib.dates import DayLocator, MonthLocator
 from sklearn.preprocessing import MinMaxScaler
 
 from arima_method import ArimaMethod
 from statsmodels.tsa.arima_model import ARIMAResults
+
+from show_plot import show_plot, NamedModelParameter
 from svr_method import SVRMethod
 from lstm_method import LSTMMethod
 
@@ -71,18 +71,10 @@ def main():
                     split_index = len(df.values) - test_sample_size - 1
                     test_dates = dates[split_index:]
 
-                    fig = plt.figure(figsize=(12, 7))
-                    ax = plt.axes()
-                    plt.plot(dates, prices, color='black', linestyle='-', label='Cena')
-                    plt.plot(test_dates, svr_results.values, color='teal', label='SVR')
-                    ax.xaxis.set_major_locator(DayLocator(interval=14))
-                    plt.xlabel('Data')
-                    plt.ylabel('Cena w USD')
-                    plt.title(
-                        'Wykres cen {0} wraz z dopasowanym modelem SVR(c={1}, gamma={2}, eps={3} i przewidzianymi wartościami'.format(currency, c, gamma, svr_eps))
-                    plt.legend()
-                    plt.grid()
-                    plt.show()
+                    show_plot(currency, dates, prices, test_dates, svr_results.values, 'SVR',
+                              [NamedModelParameter('c', c),
+                               NamedModelParameter('gamma', gamma),
+                               NamedModelParameter('epsilon', svr_eps)])
 
                 # if len(top_3_rmse) < 3:
                 #     top_3_rmse.append((rmse_table, c, gamma))
@@ -97,6 +89,8 @@ def main():
                 # print(" & ".join(map(str, mape_table)))
                 # print(" & ".join(map(str, rmspe_table)))
     print(top_3_rmse)
+
+
 
 
 
