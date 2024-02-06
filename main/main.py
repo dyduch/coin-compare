@@ -2,9 +2,6 @@ import math
 
 import numpy as np
 import pandas as pd
-import datetime
-from pandas_datareader import data as pdr
-import yfinance as yf
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 from sklearn.preprocessing import MinMaxScaler
 
@@ -15,7 +12,7 @@ from show_plot import show_plot, NamedModelParameter
 from svr_method import SVRMethod
 from lstm_method import LSTMMethod
 
-yf.pdr_override()
+from get_data import get_data, single_set_test
 
 def main():
     column_name = 'Close'
@@ -94,43 +91,6 @@ def main():
 
 
 
-def single_set_test():
-    return datetime.datetime(2023, 6, 1), datetime.datetime(2023, 11, 1)
-
-
-def variable_train_set_test():
-    return [
-        (datetime.datetime(2022, 4, 1), datetime.datetime(2022, 7, 1)),
-        (datetime.datetime(2021, 8, 1), datetime.datetime(2021, 10, 31)),
-        (datetime.datetime(2020, 7, 1), datetime.datetime(2020, 9, 30))
-    ]
-
-def variable_train_set_test_single(idx):
-    return variable_train_set_test()[idx]
-
-
-def variable_train_length_test():
-    return [
-        (datetime.datetime(2022, 4, 1), datetime.datetime(2022, 7, 1)),
-        (datetime.datetime(2022, 1, 1), datetime.datetime(2022, 7, 1)),
-        (datetime.datetime(2021, 6, 1), datetime.datetime(2022, 7, 1)),
-        (datetime.datetime(2020, 1, 1), datetime.datetime(2022, 7, 1)),
-        (datetime.datetime(2018, 1, 1), datetime.datetime(2022, 7, 1))
-    ]
-
-def variable_train_length_test_single(idx):
-    return variable_train_length_test()[idx]
-
-
-def get_data(start, end, currency, test_size: int = 0):
-    end = end + datetime.timedelta(days=test_size)
-    df = pdr.get_data_yahoo([currency], start, end)
-    df = df.sort_values('Date')
-    df = df.resample('D').bfill()
-    df.reset_index(inplace=True)
-    df.set_index("Date", inplace=True)
-
-    return df
 
 
 def get_lstm_predictions(df: pd.DataFrame, column_name: str, split: float):

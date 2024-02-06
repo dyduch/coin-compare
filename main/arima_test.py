@@ -2,14 +2,14 @@ import math
 
 import numpy as np
 import pandas as pd
-import datetime
-import pandas_datareader.data as web
 from matplotlib import pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 from matplotlib.dates import DayLocator, MonthLocator
 
 from arima_method import ArimaMethod
 from statsmodels.tsa.arima_model import ARIMAResults
+
+from get_data import get_data, variable_train_set_test_single
 
 def main():
     column_name = 'Close'
@@ -77,7 +77,6 @@ def main():
                      label='Wartości przewidziane przez model ARIMA(4, 4, 2)')
             plt.plot(test_dates, arima_results.values, color='mediumorchid', linestyle='--',
                      label='Wartości przewidziane przez model ARIMA(1, 2, 1)')
-            # plt.plot(test_dates, svr_results.values, color='orange', label='SVR')
             # plt.plot(test_dates, lstm_results.values, color='green', label='LSTM')
             ax.xaxis.set_major_locator(DayLocator(interval=14))
             plt.xlabel('Data')
@@ -90,46 +89,6 @@ def main():
         print(" & ".join(map(str, rmse_table)))
         print(" & ".join(map(str, mape_table)))
         print(" & ".join(map(str, rmspe_table)))
-
-
-def single_set_test():
-    return datetime.datetime(2020, 1, 1), datetime.datetime(2022, 7, 1)
-
-
-
-def variable_train_set_test():
-    return [
-        (datetime.datetime(2022, 4, 1), datetime.datetime(2022, 7, 1)),
-        (datetime.datetime(2021, 8, 1), datetime.datetime(2021, 10, 31)),
-        (datetime.datetime(2020, 7, 1), datetime.datetime(2020, 9, 30))
-    ]
-
-def variable_train_set_test_single(idx):
-    return variable_train_set_test()[idx]
-
-
-def variable_train_length_test():
-    return [
-        (datetime.datetime(2022, 4, 1), datetime.datetime(2022, 7, 1)),
-        (datetime.datetime(2022, 1, 1), datetime.datetime(2022, 7, 1)),
-        (datetime.datetime(2021, 6, 1), datetime.datetime(2022, 7, 1)),
-        (datetime.datetime(2020, 1, 1), datetime.datetime(2022, 7, 1)),
-        (datetime.datetime(2018, 1, 1), datetime.datetime(2022, 7, 1))
-    ]
-
-def variable_train_length_test_single(idx):
-    return variable_train_length_test()[idx]
-
-
-def get_data(start, end, currency, test_size: int = 0):
-    end = end + datetime.timedelta(days=test_size)
-    df = web.DataReader(currency, 'yahoo', start, end)
-    df = df.sort_values('Date')
-    df = df.resample('D').bfill()
-    df.reset_index(inplace=True)
-    df.set_index("Date", inplace=True)
-
-    return df
 
 def get_arima_model(df: pd.DataFrame, column_name: str, test_sample_size: int, compute_values):
     arima = ArimaMethod(compute_parameters=compute_values)
