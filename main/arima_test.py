@@ -10,6 +10,7 @@ from arima_method import ArimaMethod
 from statsmodels.tsa.arima_model import ARIMAResults
 
 from get_data import get_data, variable_train_set_test_single
+from show_plot import show_plot, NamedModelParameter, PriceData, PredictionPriceData, ModelData
 
 def main():
     column_name = 'Close'
@@ -85,6 +86,8 @@ def main():
             plt.legend()
             plt.grid()
             plt.show()
+
+            show_plot(currency, PriceData(dates, prices))
 
         print(" & ".join(map(str, rmse_table)))
         print(" & ".join(map(str, mape_table)))

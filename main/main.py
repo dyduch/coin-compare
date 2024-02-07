@@ -8,11 +8,12 @@ from sklearn.preprocessing import MinMaxScaler
 from arima_method import ArimaMethod
 from statsmodels.tsa.arima_model import ARIMAResults
 
-from show_plot import show_plot, NamedModelParameter
+from show_plot import show_plot, NamedModelParameter, PriceData, PredictionPriceData, ModelData
 from svr_method import SVRMethod
 from lstm_method import LSTMMethod
 
 from get_data import get_data, single_set_test
+
 
 def main():
     column_name = 'Close'
@@ -56,8 +57,9 @@ def main():
                     if svr_model is None:
                         svr_model = get_svr_model(svr_method, df, column_name, test_sample_size)
 
-                    svr_results, svr_rmse, svr_mape, svr_rmspe = get_svr_predictions(svr_method, svr_model, df, column_name,
-                                                                                                    test_sample_size)
+                    svr_results, svr_rmse, svr_mape, svr_rmspe = get_svr_predictions(svr_method, svr_model, df,
+                                                                                     column_name,
+                                                                                     test_sample_size)
                     print("RMSE: {0}, MAPE: {1}, RMSPE: {2}, test sample: {3}".format(svr_rmse, svr_mape, svr_rmspe,
                                                                                       test_sample_size))
 
@@ -68,10 +70,14 @@ def main():
                     split_index = len(df.values) - test_sample_size - 1
                     test_dates = dates[split_index:]
 
-                    show_plot(currency, dates, prices, test_dates, svr_results.values, 'SVR',
-                              [NamedModelParameter('c', c),
-                               NamedModelParameter('gamma', gamma),
-                               NamedModelParameter('epsilon', svr_eps)])
+                    show_plot(currency, PriceData(dates, prices),
+                              [PredictionPriceData(test_dates, svr_results.values, ModelData('SVR',
+                                                                                             [NamedModelParameter('c', c),
+                                                                                              NamedModelParameter(
+                                                                                                  'gamma', gamma),
+                                                                                              NamedModelParameter(
+                                                                                                  'epsilon', svr_eps)]),
+                                                   'teal')])
 
                 # if len(top_3_rmse) < 3:
                 #     top_3_rmse.append((rmse_table, c, gamma))
@@ -88,11 +94,6 @@ def main():
     print(top_3_rmse)
 
 
-
-
-
-
-
 def get_lstm_predictions(df: pd.DataFrame, column_name: str, split: float):
     lstm = LSTMMethod()
 
@@ -103,6 +104,7 @@ def get_lstm_predictions(df: pd.DataFrame, column_name: str, split: float):
 def get_svr_model(svr_method, df: pd.DataFrame, column_name: str, test_sample_size: int):
     split_index = len(df.values) - test_sample_size - 1
     return svr_method.fit(df, column_name, split_index)
+
 
 def get_svr_predictions(svr_method, svr_model, df: pd.DataFrame, column_name: str, test_sample_size: int):
     split_index = len(df.values) - test_sample_size - 1
@@ -130,6 +132,7 @@ def get_arima_predictions_split(model: ARIMAResults, df: pd.DataFrame, column_na
 def get_arima_predictions_size(model: ARIMAResults, df: pd.DataFrame, column_name: str, test_size_saple: int):
     split_index = len(df.values) - test_size_saple - 1
     return get_arima_predictions(model, df, column_name, split_index)
+
 
 def get_arima_predictions(model, df, column_name, split_index):
     arima = ArimaMethod(compute_parameters=True)
