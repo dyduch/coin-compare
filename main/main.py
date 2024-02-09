@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from arima_method import ArimaMethod
 from statsmodels.tsa.arima_model import ARIMAResults
 
-from show_plot import show_plot, NamedModelParameter, PriceData, PredictionPriceData, ModelData
+from show_plot import Plot, NamedModelParameter, PriceData, PlotPriceData, ModelData
 from svr_method import SVRMethod
 from lstm_method import LSTMMethod
 
@@ -70,14 +70,15 @@ def main():
                     split_index = len(df.values) - test_sample_size - 1
                     test_dates = dates[split_index:]
 
-                    show_plot(currency, PriceData(dates, prices),
-                              [PredictionPriceData(test_dates, svr_results.values, ModelData('SVR',
-                                                                                             [NamedModelParameter('c', c),
-                                                                                              NamedModelParameter(
-                                                                                                  'gamma', gamma),
-                                                                                              NamedModelParameter(
-                                                                                                  'epsilon', svr_eps)]),
-                                                   'teal')])
+                    plot = Plot(currency)
+                    plot.add_data(PlotPriceData(dates, prices))
+                    plot.add_data(PlotPriceData(test_dates, svr_results.values,
+                                                ModelData('SVR', [
+                                                    NamedModelParameter('c', c),
+                                                    NamedModelParameter('gamma', gamma),
+                                                    NamedModelParameter('epsilon', svr_eps)]), 'teal', '--'))
+
+                    plot.show()
 
                 # if len(top_3_rmse) < 3:
                 #     top_3_rmse.append((rmse_table, c, gamma))

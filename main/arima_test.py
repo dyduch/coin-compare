@@ -10,7 +10,8 @@ from arima_method import ArimaMethod
 from statsmodels.tsa.arima_model import ARIMAResults
 
 from get_data import get_data, variable_train_set_test_single
-from show_plot import show_plot, NamedModelParameter, PriceData, PredictionPriceData, ModelData
+from show_plot import Plot, NamedModelParameter, PriceData, PlotPriceData, ModelData
+
 
 def main():
     column_name = 'Close'
@@ -67,27 +68,36 @@ def main():
             rmspe_table.append(arima_rmspe)
             split_index = len(df.values) - test_sample_size - 1
             test_dates = dates[split_index:]
-            fig = plt.figure(figsize=(12, 7))
-            ax = plt.axes()
-            plt.plot(dates, prices, color='black', linestyle='-', label='Cena')
-            plt.plot(train_dates[1:-2], arima_model.fittedvalues[2:], color='lightseagreen',
-                     label='Wartości dopasowane przez model ARIMA(1, 2, 1)')
-            plt.plot(train_dates[3:-2], arima_model_comp.fittedvalues[4:], color='peru',
-                     label='Wartości dopasowane przez model ARIMA(4, 4, 2)')
-            plt.plot(test_dates, arima_results_c.values, color='saddlebrown', linestyle='--',
-                     label='Wartości przewidziane przez model ARIMA(4, 4, 2)')
-            plt.plot(test_dates, arima_results.values, color='mediumorchid', linestyle='--',
-                     label='Wartości przewidziane przez model ARIMA(1, 2, 1)')
-            # plt.plot(test_dates, lstm_results.values, color='green', label='LSTM')
-            ax.xaxis.set_major_locator(DayLocator(interval=14))
-            plt.xlabel('Data')
-            plt.ylabel('Cena w USD')
-            plt.title('Wykres cen {0} wraz z dopasowanym modelem ARIMA i przewidzianymi wartościami'.format(currency))
-            plt.legend()
-            plt.grid()
-            plt.show()
 
-            show_plot(currency, PriceData(dates, prices))
+            plot = Plot(currency)
+            plot.add_data(PlotPriceData(dates, prices))
+            plot.add_data(PlotPriceData(train_dates[1:-2], arima_model.fittedvalues[2:],
+                                        ModelData('ARIMA - dopasowany model', [
+                                            NamedModelParameter('p', '1'),
+                                            NamedModelParameter('d', '2'),
+                                            NamedModelParameter('q', '1')]), 'lightseagreen', '-'))
+
+            plot.add_data(PlotPriceData(train_dates[3:-2], arima_model_comp.fittedvalues[4:],
+                                        ModelData('ARIMA - dopasowany model', [
+                                            NamedModelParameter('p', '4'),
+                                            NamedModelParameter('d', '4'),
+                                            NamedModelParameter('q', '2')]), 'peru', '-'))
+
+
+            plot.add_data(PlotPriceData(test_dates, arima_results.values,
+                                        ModelData('ARIMA - przewidziane wartości', [
+                                            NamedModelParameter('p', '1'),
+                                            NamedModelParameter('d', '2'),
+                                            NamedModelParameter('q', '1')]), 'mediumorchid', '--'))
+
+            plot.add_data(PlotPriceData(test_dates, arima_results_c.values,
+                                        ModelData('ARIMA - przewidziane wartości', [
+                                            NamedModelParameter('p', '4'),
+                                            NamedModelParameter('d', '4'),
+                                            NamedModelParameter('q', '2')]), 'saddlebrown', '--'))
+
+            plot.show()
+
 
         print(" & ".join(map(str, rmse_table)))
         print(" & ".join(map(str, mape_table)))
