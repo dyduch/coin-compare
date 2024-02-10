@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.dates import date2num
 from sklearn.svm import SVR
-
+from sklearn.preprocessing import MinMaxScaler
 
 class SVRMethod:
     def __init__(self, kernel: str = 'rbf',
@@ -13,11 +13,14 @@ class SVRMethod:
         self.c_reg = c_reg
         self.gamma = gamma
         self.epsilon = epsilon
+        self.scaler = MinMaxScaler()
 
     def fit(self, data: pd.DataFrame, column: str, split_index: int) -> SVR:
-        filtered_data = data.loc[:, [column]]
 
-        train_df = filtered_data.iloc[:split_index, :]
+        filtered_data = data.loc[:, [column]]
+        scaled_data = pd.DataFrame(self.scaler.fit_transform(filtered_data), columns=filtered_data.columns, index=filtered_data.index)
+
+        train_df = scaled_data.iloc[:split_index, :]
         train_df = train_df.reset_index()
         train_df['Date'] = train_df['Date'].map(date2num)
 
@@ -39,5 +42,10 @@ class SVRMethod:
 
         dates = df['Date'].values
         dates = np.reshape(dates, (len(dates), 1))
+
         result = model.predict(dates)
-        return pd.Series(result, index=original_dates)
+
+        result = self.scaler.inverse_transform(result.reshape(-1, 1))
+        result = result.reshape(1, -1).flatten()
+        result = pd.Series(result, index=original_dates)
+        return result
