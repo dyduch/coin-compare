@@ -2,7 +2,7 @@ from typing import List
 
 from numpy import ndarray
 from matplotlib import pyplot as plt
-from matplotlib.dates import DayLocator
+from matplotlib.dates import DayLocator, DateFormatter
 
 class NamedModelParameter:
     name: str
@@ -53,6 +53,7 @@ class Plot:
 
         plt.figure(figsize=(12, 7))
         ax = plt.axes()
+        ax.xaxis.set_major_formatter(DateFormatter('%m/%d/%Y'))
         ax.xaxis.set_major_locator(DayLocator(interval=14))
         plt.xlabel('Data')
         plt.ylabel('Cena w USD')
@@ -79,19 +80,3 @@ class Plot:
     def show(self):
         plt.legend()
         plt.show()
-
-# def show_plot(currency: str, actual_price_data: PriceData, prediction_data: List[PlotPriceData]):
-#     title = get_title(currency)
-#     fig = plt.figure(figsize=(12, 7))
-#     ax = plt.axes()
-#     plt.plot(actual_price_data.dates, actual_price_data.prices, color='black', linestyle='-', label='Cena')
-#     for prediction in prediction_data:
-#         plt.plot(prediction.dates, prediction.prices,
-#                  color=prediction.color, label=get_prediction_label(prediction.model_data))
-#     ax.xaxis.set_major_locator(DayLocator(interval=14))
-#     plt.xlabel('Data')
-#     plt.ylabel('Cena w USD')
-#     plt.title(title)
-#     plt.legend()
-#     plt.grid()
-#     plt.show()
